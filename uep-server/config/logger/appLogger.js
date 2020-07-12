@@ -72,6 +72,17 @@ function updateOptionsDynamicPath() {
 
 const splitter = format((info, opts) => {
     updateOptionsDynamicPath(); // update daily new folder path
+    // clone to handle winston bug
+    if (info.logType) {
+        const cloned = Object.assign({}, info);
+        delete cloned.level;
+        delete cloned.timestamp;
+        info.message = cloned;
+        delete info.logType;
+        delete info.statusCode;
+        delete info.body;
+    }
+    // console.log(info);
     if (info.level == "info") {
         if (info.message.logType) {
             const msgLogType = info.message.logType;

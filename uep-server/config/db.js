@@ -8,7 +8,7 @@ const CustomError = require("../api/base/CustomError");
 
 const mysql = require("mysql");
 const SqlString = require("mysql/lib/protocol/SqlString");
-const ObjectUtil = require("../api/utils/objectUtil");
+// const ObjectUtil = require("../api/utils/objectUtil");
 
 /**
  * MySQL Pool Connection
@@ -25,7 +25,6 @@ const pool = mysql.createPool({
     queryFormat: function(sql, values, timeZone) {
         sql = SqlString.format(sql, values, false, timeZone);
         sql = sql.replace(/'CURRENT_TIMESTAMP\(\)'/g, "CURRENT_TIMESTAMP()");
-        sql = sql.replace("'TIMESTAMPDIFF(SECOND, startTime, endTime)'", "TIMESTAMPDIFF(SECOND, startTime, endTime)");
         // sql = sql.replace(/'UNIX_TIMESTAMP\(\)'/g, "UNIX_TIMESTAMP()");
         // sql = sql.replace(/'NOW\(\)'/g, "NOW()");
         return sql;
