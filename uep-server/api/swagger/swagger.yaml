@@ -69,6 +69,30 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /suspend:
+    x-swagger-router-controller: teacher
+    post:
+      tags:
+        - Teacher
+      description: Suspend a specified student
+      operationId: suspendStudent
+      parameters:
+        - name: request
+          in: body
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/suspendStudentReq'
+      responses:
+        "200":
+          description: General
+          schema:
+            $ref: '#/definitions/GeneralResponse'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
 definitions:
   GeneralResponse:
     required:
@@ -115,3 +139,11 @@ definitions:
         description: student email addresses
         items:
           type: string
+
+  suspendStudentReq:
+    required:
+      - student
+    properties:
+      student:
+        type: string
+        description: student email address

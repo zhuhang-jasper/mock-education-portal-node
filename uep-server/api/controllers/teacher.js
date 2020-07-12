@@ -22,12 +22,54 @@ const StudentService = require("../services/student-service");
 
 module.exports = {
     registerStudent,
-    getCommonStudents
+    getCommonStudents,
+    suspendStudent
 };
 
 const IDENTIFIER = "TeacherController";
 function logController(str) {
     AppLogger.debug(`Calling ${IDENTIFIER}->${str}()...`);
+}
+
+async function registerStudent(req, res) {
+    logController("registerStudent");
+
+    try {
+        // Validate Query Parameters
+        const validatorResponse = ParamValidator.validateParams(
+            req.body, // GET:req.query | POST:req.body
+            {
+                teacher: { type: "string", required: true },
+                students: { type: "array", required: true }
+            },
+            null // GET:'value' | POST:null
+        );
+        if (validatorResponse.errObj != null) {
+            throw validatorResponse.errObj;
+        }
+
+        // Prepare request params
+        const teacher = req.body.teacher;
+        const students = req.body.students;
+        if (!students.length) {
+            throw new Error("Students cannot be empty.");
+        }
+
+        // Pull results from database
+        const serviceResponse = await TeacherService.registerStudents(teacher, students);
+        if (serviceResponse.hasError()) {
+            throw serviceResponse.customError;
+        }
+
+        const responseObj = {
+            // body: serviceResponse.body
+        };
+
+        BaseController.respond(res, 204, responseObj);
+
+    } catch (err) {
+        BaseController.respondAndLogError(res, err);
+    }
 }
 
 async function getCommonStudents(req, res) {
@@ -65,23 +107,22 @@ async function getCommonStudents(req, res) {
             })
         };
 
-        BaseController.respond(res, responseObj);
+        BaseController.respond(res, 200, responseObj);
 
     } catch (err) {
         BaseController.respondAndLogError(res, err);
     }
 }
 
-async function registerStudent(req, res) {
-    logController("registerStudent");
+async function suspendStudent(req, res) {
+    logController("suspendStudent");
 
     try {
         // Validate Query Parameters
         const validatorResponse = ParamValidator.validateParams(
             req.body, // GET:req.query | POST:req.body
             {
-                teacher: { type: "string", required: true },
-                students: { type: "array", required: true }
+                student: { type: "string", required: true }
             },
             null // GET:'value' | POST:null
         );
@@ -90,23 +131,19 @@ async function registerStudent(req, res) {
         }
 
         // Prepare request params
-        const teacher = req.body.teacher;
-        const students = req.body.students;
-        if (!students.length) {
-            throw new Error("Students cannot be empty.");
-        }
+        const studentEmail = req.body.student;
 
         // Pull results from database
-        const serviceResponse = await TeacherService.registerStudents(teacher, students);
+        const serviceResponse = await StudentService.suspendStudent(studentEmail);
         if (serviceResponse.hasError()) {
             throw serviceResponse.customError;
         }
 
         const responseObj = {
-            body: serviceResponse.body
+            // body: serviceResponse.body
         };
 
-        BaseController.respond(res, responseObj);
+        BaseController.respond(res, 204, responseObj);
 
     } catch (err) {
         BaseController.respondAndLogError(res, err);
