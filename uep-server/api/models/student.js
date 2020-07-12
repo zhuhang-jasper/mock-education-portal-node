@@ -1,4 +1,5 @@
 const moment = require("moment");
+const ObjectUtil = require("../utils/objectUtil");
 module.exports = class Student {
 
     /**
@@ -104,8 +105,12 @@ module.exports = class Student {
         this._updatedDate = updatedDate;
     }
 
-    toJSONObject() {
-        return {
+    /**
+     * Returns JSON object representation of the model
+     * @param {string[]} excludedAttribs attributes to be excluded in the object
+     */
+    toJSONObject(...excludedAttribs) {
+        const obj = {
             email: this._email,
             firstName: this._firstName,
             lastName: this._lastName,
@@ -116,6 +121,10 @@ module.exports = class Student {
             updatedBy: this._updatedBy,
             updatedDate: this._updatedDate ? moment(this._updatedDate).format("YYYY-MM-DD HH:mm:ss") : undefined
         };
+        for (const exAttrib of excludedAttribs) {
+            delete obj[exAttrib];
+        }
+        return ObjectUtil.removeUndefinedProperties(obj);
     }
 
 };

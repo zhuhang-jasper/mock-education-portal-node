@@ -25,7 +25,8 @@ const ResponseObject = require("../base/ResponseObject");
 module.exports = {
     createAndReturnStudent,
     getStudentByEmail,
-    retrieveStudentsCommonToTeachers
+    retrieveStudentsCommonToTeachers,
+    suspendStudent
 };
 
 // Database Table Names
@@ -214,11 +215,69 @@ async function createStudent(student = null, connection = null) {
 
             // Execute SQL
             const sqlInsertResult = await mysql.executeQuery(insertSql, params, localConnection);
-            if (sqlInsertResult.affectedRows == 1) {
+            if (sqlInsertResult.affectedRows) {
                 // Setup Success Response Object
                 respBody.insertId = sqlInsertResult.insertId;
                 respBody.insertedCount = sqlInsertResult.affectedRows;
                 student.id = sqlInsertResult.insertId;
+                respBody.student = student;
+            } else {
+                throw new Error("No record inserted.");
+            }
+        }
+    } catch (err) {
+        if (!connection) {
+            AppLogger.error(err.stack);
+            await mysql.rollbackAndRelease(localConnection);
+        }
+        return new ResponseObject(err);
+    }
+
+    // commit records if everything is working
+    if (!connection) {
+        await mysql.commitAndRelease(localConnection);
+    }
+
+    return new ResponseObject(respBody);
+}
+
+/**
+ * Update student in database
+ * @param {Student} student student model
+ * @param {*} connection MySQL connection
+ */
+async function updateStudent(student = null, connection = null) {
+    logService("updateStudent");
+
+    const respBody = {
+        updatedCount: 0,
+        student: null
+    };
+
+    // Prepare DB Connection
+    let localConnection = connection;
+    if (!connection) {
+        localConnection = await mysql.getConn();
+        await localConnection.beginTransaction();
+    }
+
+    try {
+        // Prepare SQL statement
+        const updateSql = `UPDATE ${studentTable} SET ? ` +
+            " WHERE id = ?  ";
+
+        if (student) {
+            // Prepare SQL params
+            const jsonModel = student.toJSONObject("id", "createdBy", "createdDate");
+            jsonModel.updatedBy = config.db.mysql.user;
+            jsonModel.updatedDate = "CURRENT_TIMESTAMP()";
+            const params = [jsonModel, student.id];
+
+            // Execute SQL
+            const sqlUpdateResult = await mysql.executeQuery(updateSql, params, localConnection);
+            if (sqlUpdateResult.affectedRows) {
+                // Setup Success Response Object
+                respBody.updatedCount = sqlUpdateResult.affectedRows;
                 respBody.student = student;
             } else {
                 throw new Error("No record inserted.");
@@ -246,7 +305,6 @@ async function createStudent(student = null, connection = null) {
  * Register students to specified teacher
  * @param {string} teacherEmail teacher's email address
  * @param {string[]} studentEmails array of student email addresses
- * @param {*} connection MySQL connection
  */
 async function retrieveStudentsCommonToTeachers(teacherEmails = []) {
     logService("retrieveStudentsCommonToTeachers");
@@ -260,6 +318,40 @@ async function retrieveStudentsCommonToTeachers(teacherEmails = []) {
         // Query
         const commonStudents = await getStudentsByCommonTeacherEmails(teacherEmails);
         respBody.students = commonStudents;
+
+    } catch (err) {
+        return new ResponseObject(err);
+    }
+
+    return new ResponseObject(respBody);
+}
+
+/**
+ * Suspend one student
+ * @param {string} studentEmail student email address
+ */
+async function suspendStudent(studentEmail = []) {
+    logService("suspendStudent");
+
+    const respBody = {
+        suspendedStudents: 0
+    };
+
+    try {
+
+        // Get/Create student
+        const student = await createAndReturnStudent(studentEmail);
+
+        // Set isSuspended to true
+        student.isSuspended = true;
+
+        // Update
+        const updateStudentResp = await updateStudent(student);
+        if (updateStudentResp.hasError()) {
+            throw updateStudentResp.customError;
+        } else {
+            respBody.suspendedStudents = updateStudentResp.body.updatedCount;
+        }
 
     } catch (err) {
         return new ResponseObject(err);

@@ -6,11 +6,11 @@ const config = require(appRoot + "/config/config");
 const mysql = require("../../config/db").mysql;
 
 // Utility requirement
-const DalUtil = require("../utils/dalUtil");
-const ObjectUtil = require("../utils/objectUtil");
-const NumberUtil = require("../utils/numberUtil");
-// const StringUtil = require("../utils/stringUtil");
 const moment = require("moment");
+// const DalUtil = require("../utils/dalUtil");
+// const ObjectUtil = require("../utils/objectUtil");
+// const NumberUtil = require("../utils/numberUtil");
+// const StringUtil = require("../utils/stringUtil");
 
 // Other Service requirement
 const StudentService = require("./student-service");
@@ -141,20 +141,13 @@ async function createTeacher(teacher = null, connection = null) {
 
         if (teacher) {
             // Prepare SQL params
-            // const insertParamObj = {
-            //     email: teacher.email,
-            //     firstName: teacher.firstName,
-            //     lastName: teacher.lastName,
-            //     status: teacher.status,
-            //     createdBy: config.db.mysql.user
-            // };
-            // ObjectUtil.removeUndefinedProperties(insertParamObj);
-            teacher.createdBy = config.db.mysql.user;
-            const params = [teacher.toJSONObject()];
+            const jsonModel = teacher.toJSONObject();
+            jsonModel.createdBy = config.db.mysql.user;
+            const params = [jsonModel];
 
             // Execute SQL
             const sqlInsertResult = await mysql.executeQuery(sql, params, localConnection);
-            if (sqlInsertResult.affectedRows == 1) {
+            if (sqlInsertResult.affectedRows) {
                 // Setup Success Response Object
                 respBody.insertId = sqlInsertResult.insertId;
                 respBody.insertedCount = sqlInsertResult.affectedRows;
@@ -208,17 +201,17 @@ async function createTeacherStudentLinks(teacherStudentLinks = [], connection = 
 
         if (Array.isArray(teacherStudentLinks) && teacherStudentLinks.length) {
             // Prepare SQL params
-            const params = [teacherStudentLinks];
+            const arrayModel = teacherStudentLinks.map(tsLink => {
+                return tsLink.toArrayValues("teacherId", "studentId", "status", "createdBy");
+            });
+            const params = [arrayModel];
 
             // Execute SQL
             const sqlInsertResult = await mysql.executeQuery(sql, params, localConnection);
-            if (sqlInsertResult.changedRows == teacherStudentLinks.length) {
+            // console.log(sqlInsertResult);
+            if (sqlInsertResult.affectedRows) {
                 // Setup Success Response Object
-                respBody.insertedCount = sqlInsertResult.changedRows;
-            } else if (sqlInsertResult.affectedRows < teacherStudentLinks.length) {
-                throw new Error("Not all record inserted. Rolling back.");
-            } else if (!sqlInsertResult.affectedRows) {
-                throw new Error("No record inserted.");
+                respBody.insertedCount = sqlInsertResult.affectedRows;
             }
         }
     } catch (err) {
@@ -240,12 +233,11 @@ async function createTeacherStudentLinks(teacherStudentLinks = [], connection = 
 /* ------ Above functions supposed to be in DAL ----- */
 
 /**
- * Register students to specified teacher
+ * Register students to a specified teacher
  * @param {string} teacherEmail teacher's email address
  * @param {string[]} studentEmails array of student email addresses
- * @param {*} connection MySQL connection
  */
-async function registerStudents(teacherEmail = null, studentEmails = [], connection = null) {
+async function registerStudents(teacherEmail = null, studentEmails = []) {
     logService("registerStudents");
 
     const respBody = {
@@ -254,6 +246,7 @@ async function registerStudents(teacherEmail = null, studentEmails = [], connect
     };
 
     try {
+        /** @type {TeacherStudent[]} */
         const teacherStudentLinks = [];
 
         // Get/Create teacher
@@ -270,7 +263,7 @@ async function registerStudents(teacherEmail = null, studentEmails = [], connect
                 // Create teacher-student link
                 const tsLink = new TeacherStudent(teacher.id, student.id);
                 tsLink.createdBy = config.db.mysql.user;
-                teacherStudentLinks.push(tsLink.toArrayValues("teacherId", "studentId", "status", "createdBy"));
+                teacherStudentLinks.push(tsLink);
             }
         }
 
