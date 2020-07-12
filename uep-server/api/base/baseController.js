@@ -26,14 +26,14 @@ const emptyApiErrorResponse = {
     reqId: "",
     statusCode: StatusCode.FAILED.code,
     errorCode: ErrorCode.UNKNOWN_EXCEPTION.code,
-    errorMessage: ErrorCode.UNKNOWN_EXCEPTION.message
+    message: ErrorCode.UNKNOWN_EXCEPTION.message
 };
 
 /* Empty Success Response Template */
 const emptyApiSuccessResponse = {
     reqId: "",
     statusCode: StatusCode.SUCCESS.code,
-    body: null
+    message: "Success"
 };
 
 /**
@@ -48,8 +48,8 @@ function getErrorResponse(error = null) {
     const resp = emptyApiErrorResponse;
     resp.reqId = getRequestId();
     resp.errorCode = customError.errorCode;
-    resp.errorMessage = customError.errorMessage;
-    resp.actualError = customError.actualError || undefined;
+    resp.message = customError.errorMessage;
+    // resp.actualError = customError.actualError || undefined;
 
     return { statusCode: httpStatus, response: resp };
 }
@@ -83,8 +83,10 @@ function respondSuccessBody(responder, responseBody) {
     const resp = emptyApiSuccessResponse;
     resp.reqId = getRequestId();
     resp.statusCode = StatusCode.SUCCESS.code;
-    resp.body = responseBody;
-    sendApiResponse(responder, 200, resp);
+    // if (!ObjectUtil.isEmpty(responseBody)) {
+    //     resp.body = responseBody;
+    // }
+    sendApiResponse(responder, 200, Object.assign({}, resp, responseBody));
 }
 
 function respondAndLogError(responder, errorObject) {
