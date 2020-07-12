@@ -1,0 +1,49 @@
+{
+  "name": "ufinity-education-portal-node",
+  "version": "1.0.0",
+  "description": "ufinity technical assesment",
+  "main": "app.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=dev nodemon app.js",
+    "prod": "cross-env NODE_ENV=prod node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhuhang-jasper/ufinity-education-portal-node.git"
+  },
+  "author": "zhuhang-jasper",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhuhang-jasper/ufinity-education-portal-node/issues"
+  },
+  "homepage": "https://github.com/zhuhang-jasper/ufinity-education-portal-node#readme",
+  "dependencies": {
+    "app-root-path": "^3.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.2",
+    "custom-env": "^2.0.1",
+    "express": "^4.17.1",
+    "express-http-context": "^1.2.3",
+    "helmet": "^3.23.3",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.27.0",
+    "nodemon": "^2.0.3",
+    "swagger-express-mw": "^0.7.0",
+    "swagger-ui-express": "^4.1.4",
+    "uuid": "^8.2.0",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
+}
