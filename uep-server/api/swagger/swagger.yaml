@@ -1,0 +1,117 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Ufinity Education Portal RESTful Server
+  description: To serve RESTful services for education portal
+  contact:
+    name: Jasper Loo Zhu Hang
+    email: zhuhang.jasper@gmail.com
+basePath: /api
+# schemes:
+  # - https
+  # - http
+# securityDefinitions:
+  # BearerJwt:
+  #   type: apiKey
+  #   in: header
+  #   name: Authorization
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+
+  /register:
+    x-swagger-router-controller: teacher
+    post:
+      tags:
+        - Teacher
+      description: Register one or more students to a specified teacher.
+      operationId: registerStudent
+      parameters:
+        - name: request
+          in: body
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/teacherRegisterStudentReq'
+      responses:
+        "200":
+          description: General
+          schema:
+            $ref: '#/definitions/GeneralResponse'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /commonstudents:
+    x-swagger-router-controller: teacher
+    get:
+      tags:
+        - Teacher
+      description: Retrieve a list of students common to a given list of teachers.
+      operationId: getCommonStudents
+      parameters:
+        - in: query
+          name: teacher
+          type: array
+          required: true
+          items:
+            type: string
+      responses:
+        "200":
+          description: General
+          schema:
+            $ref: '#/definitions/GeneralResponse'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  GeneralResponse:
+    required:
+      - reqId
+    properties:
+      reqId:
+        type: string
+        maxLength: 50
+      statusCode:
+        type: string
+        maxLength: 10
+      body:
+        type: object
+
+  ErrorResponse:
+    required:
+      - reqId
+      - statusCode
+      - errorCode
+      - errorMessage
+    properties:
+      reqId:
+        type: string
+        maxLength: 50
+      statusCode:
+        type: string
+        maxLength: 10
+      errorCode:
+        type: string
+        maxLength: 100
+      errorMessage:
+        type: string
+
+  teacherRegisterStudentReq:
+    required:
+      - teacher
+      - students
+    properties:
+      teacher:
+        type: string
+        description: teacher email address
+      students:
+        type: array
+        description: student email addresses
+        items:
+          type: string
