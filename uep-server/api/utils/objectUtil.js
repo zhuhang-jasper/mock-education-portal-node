@@ -2,7 +2,7 @@
 /* Utility : Object    */
 /* --------------------- */
 
-module.exports = { isObject, mergeDeep, isEmpty, isFunction, traverseDeep, removeUndefinedProperties, isAsync, getObjectByChaining, fillRange, isCyclic, makeHtmlFriendly, maskedProperties, truncateArray };
+module.exports = { isObject, mergeDeep, isEmpty, isFunction, traverseDeep, removeUndefinedProperties, isCyclic, makeHtmlFriendly, maskedProperties, truncateArray, removeDuplicateFromArray };
 
 /**
  * Simple object check.
@@ -54,14 +54,6 @@ function isFunction(functionToCheck) {
 }
 
 /**
- * Check if function is async
- * @param fn The function to be checked
- */
-function isAsync(fn) {
-    return fn.constructor.name === "AsyncFunction";
-}
-
-/**
  * Check if object is circular
  * @param obj The object to be checked
  */
@@ -99,15 +91,6 @@ function isCyclic(obj) {
     // }
 
     return detect(obj);
-}
-
-/**
- * Fill integers into an array
- * @param start The starting integer to insert
- * @param end The ending integer to stop inserting
- */
-function fillRange(start, end) {
-    return Array(end - start + 1).fill(0).map((item, index) => start + index);
 }
 
 /**
@@ -176,20 +159,6 @@ function removeUndefinedProperties(object) {
     return object;
 }
 
-function getObjectByChaining(object, chains) {
-    if (typeof object == "object" && chains.length) {
-        const chained = object[chains[0]];
-        if (chained) {
-            if (chains.length > 1) {
-                return getObjectByChaining(chained, chains.slice(1));
-            } else {
-                return chained;
-            }
-        }
-    }
-    return undefined;
-}
-
 // HTML friendly - @author zhuhang.jasper
 function makeHtmlFriendly(content) {
     if (isObject(content)) {
@@ -211,4 +180,15 @@ function maskedProperties(object) {
         }
     }
     return masked;
+}
+
+/**
+ * Returns an array with duplicate elements removed
+ * @param {string[]} arr array of strings
+ */
+function removeDuplicateFromArray(arr) {
+    const seen = {};
+    return arr.filter(function(item) {
+        return Object.prototype.hasOwnProperty.call(seen, item) ? false : (seen[item] = true);
+    });
 }

@@ -1,16 +1,14 @@
 const moment = require("moment");
 const ObjectUtil = require("../utils/objectUtil");
-module.exports = class Teacher {
+const Teacher = require("./teacher");
+module.exports = class Notification {
 
     /**
-     * Create Teacher object
-     * @param {string} email teacher's email
+     * Create Notification object
      */
-    constructor(email) {
+    constructor() {
         /** @private */
-        this._email = email;
-        /** @private */
-        this._status = "INACTIVE";
+        this.text = "";
     }
 
     /** @type {number} */
@@ -22,40 +20,22 @@ module.exports = class Teacher {
         this._id = id;
     }
 
-    /** @type {string} */
-    get email() {
-        return this._email;
+    /** @type {Teacher} */
+    get teacher() {
+        return this._teacher;
     }
 
-    set email(email) {
-        this._email = email;
-    }
-
-    /** @type {string} */
-    get firstName() {
-        return this._firstName;
-    }
-
-    set firstName(firstName) {
-        this._firstName = firstName;
+    set teacher(teacher) {
+        this._teacher = teacher;
     }
 
     /** @type {string} */
-    get lastName() {
-        return this._lastName;
+    get text() {
+        return this._text;
     }
 
-    set lastName(lastName) {
-        this._lastName = lastName;
-    }
-
-    /** @type {string} */
-    get status() {
-        return this._status;
-    }
-
-    set status(status) {
-        this._status = status;
+    set text(text) {
+        this._text = text;
     }
 
     /** @type {string} */
@@ -100,10 +80,8 @@ module.exports = class Teacher {
      */
     toJSONObject(...excludedAttribs) {
         const obj = {
-            email: this._email,
-            firstName: this._firstName,
-            lastName: this._lastName,
-            status: this._status,
+            teacherId: this._teacher.id,
+            text: this._text,
             createdBy: this._createdBy,
             createdDate: this._createdDate ? moment(this._createdDate).format("YYYY-MM-DD HH:mm:ss") : undefined,
             updatedBy: this._updatedBy,

@@ -2,7 +2,7 @@
 /* Utility : String    */
 /* --------------------- */
 
-module.exports = { isNotEmptyOrNull, returnEmptyStringIfNull, equalsIgnoreCase, headToLowerCase, sortAscending, sortDescending, toTitleCase, stringTruncate, getListFromDelimitedText };
+module.exports = { isNotEmptyOrNull, returnEmptyStringIfNull, equalsIgnoreCase, getEmailMentionsFromText };
 
 /**
  * Check if string is null or empty
@@ -38,59 +38,22 @@ function equalsIgnoreCase(str1 = "", str2 = "") {
     }
 }
 
-function toTitleCase(strMessage) {
-    if (!isNotEmptyOrNull(strMessage)) {
-        return "";
-    }
-    return strMessage.split(/\s+/)
-        .map(firstChar => firstChar[0].toUpperCase() + firstChar.substr(1).toLowerCase())
-        .join(" ");
-}
+/**
+ * Get list of emails mentioned in text after '@' character
+ * @param {string} text the text
+ * @returns {string[]} array of emails
+ */
+function getEmailMentionsFromText(text = "") {
+    const emailMentionRegex = /@(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/g;
 
-function headToLowerCase(strMessage) {
-    if (!isNotEmptyOrNull(strMessage)) {
-        return "";
-    }
-    return strMessage.split(/\s+/)
-        .map(firstChar => firstChar[0].toLowerCase() + firstChar.substr(1))
-        .join(" ");
-}
-
-function sortAscending(obj1, obj2, key) {
-    if (typeof obj1[key] === "string" && typeof obj2[key] === "string") {
-        if (obj1[key].toLowerCase() < obj2[key].toLowerCase()) {
-            return -1;
-        }
-        if (obj1[key].toLowerCase() > obj2[key].toLowerCase()) {
-            return 1;
-        }
-    } else {
-        if (obj1[key] < obj2[key]) {
-            return -1;
-        }
-        if (obj1[key] > obj2[key]) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-function sortDescending(obj1, obj2, key) {
-    return sortAscending(obj1, obj2, key) * -1;
-}
-
-function stringTruncate(string, length, text) {
-    if (!string) { return null; }
-    if (string.length > length) {
-        return string.substring(0, length) + text;
-    } else {
-        return string;
-    }
-}
-
-function getListFromDelimitedText(text = "", delimiter = ",") {
     if (text) {
-        return text.split(delimiter).filter(item => isNotEmptyOrNull(item)).map(item => item.trim());
+        const mentions = text.match(emailMentionRegex);
+        if (mentions && mentions.length) {
+            const emails = mentions.map(mentions => {
+                return mentions.trim().substr(1); // remove '@' character
+            });
+            return emails;
+        }
     }
     return [];
 }
