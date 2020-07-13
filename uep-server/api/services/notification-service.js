@@ -1,30 +1,21 @@
 const appRoot = require("app-root-path");
 const AppLogger = require(appRoot + "/config/logger/appLogger");
-const config = require(appRoot + "/config/config");
+// const config = require(appRoot + "/config/config");
 
-// DB requirement
-// const mysql = require("../../config/db").mysql;
+// DAL requirement
+const StudentDal = require("../dals/studentDal");
 
 // Utility requirement
-// const moment = require("moment");
 const StringUtil = require("../utils/stringUtil");
 const ObjectUtil = require("../utils/objectUtil");
-// const DalUtil = require("../utils/dalUtil");
-// const NumberUtil = require("../utils/numberUtil");
 
 // Other Service requirement
 const StudentService = require("./student-service");
 
-// Constants
-// const Teacher = require("../models/teacher");
-// const Student = require("../models/student");
-// const Notification = require("../models/notification");
-// const TeacherStudent = require("../models/teacherStudent");
+// Models
 
 // Error Handling
 const ResponseObject = require("../base/ResponseObject");
-// const CustomError = require("../base/CustomError");
-// const ErrorCode = require('../constants/responseErrorCode');
 
 module.exports = {
     retrieveRecipientsForNotification
@@ -53,27 +44,26 @@ async function retrieveRecipientsForNotification(teacherEmail = null, notificati
 
     try {
         // Identify emails mentioned in the text, and verify student exists
-        let verifiedStudentsMentionedEmails = [];
+        let verifiedMentionedStudentsEmails = [];
         const emailsMentioned = StringUtil.getEmailMentionsFromText(notificationText);
         if (emailsMentioned && emailsMentioned.length) {
-            const verifiedStudentsMentioned = await StudentService.getStudentsByEmails(emailsMentioned);
-            if (verifiedStudentsMentioned.length) {
-                verifiedStudentsMentionedEmails = verifiedStudentsMentioned.map(student => {
+            const verifiedMentionedStudents = await StudentDal.getStudentsByEmails(emailsMentioned);
+            if (verifiedMentionedStudents.length) {
+                verifiedMentionedStudentsEmails = verifiedMentionedStudents.map(student => {
                     return student.email;
                 });
             }
         }
 
         // Retrieve unsuspended students of a teacher
-        let teacherUnsuspendedStudents = [];
-        const getStudentsResp = await StudentService.retrieveUnsuspendedStudentsOfTeacher(teacherEmail);
-        if (getStudentsResp.hasError()) {
-            throw getStudentsResp.customError;
-        }
-        teacherUnsuspendedStudents = getStudentsResp.body.students;
+        let teacherUnsuspendedStudentsEmails = [];
+        const unsuspendedStudents = await StudentDal.getUnsuspendedStudentsOfTeacherEmail(teacherEmail);
+        teacherUnsuspendedStudentsEmails = unsuspendedStudents.map(student => {
+            return student.email;
+        });
 
         // Combine all students emails (remove duplicate)
-        respBody.recipients = ObjectUtil.removeDuplicateFromArray(verifiedStudentsMentionedEmails.concat(teacherUnsuspendedStudents));
+        respBody.recipients = ObjectUtil.removeDuplicateFromArray(verifiedMentionedStudentsEmails.concat(teacherUnsuspendedStudentsEmails));
 
     } catch (err) {
         return new ResponseObject(err);
