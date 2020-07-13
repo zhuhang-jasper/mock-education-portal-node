@@ -52,6 +52,7 @@ git clone https://github.com/zhuhang-jasper/ufinity-education-portal-node.git
 ### Method 2: Manual using NPM Commands
 
 * To start Node.js RESTful app - In the repo folder, open CMD and run the following commands:
+* After started, API doc can be accessed via: [http://localhost:4300/api-docs](http://localhost:4300/api-docs)
 
 ```
 cd uep-server
