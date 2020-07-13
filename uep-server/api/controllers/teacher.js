@@ -4,10 +4,6 @@ const BaseController = require("../base/baseController");
 
 // Utility requirement
 const ParamValidator = require("../utils/validator");
-// const NumberUtil = require("../utils/numberUtil");
-// const StringUtil = require("../utils/stringUtil");
-// const ObjectUtil = require("../utils/objectUtil");
-// const moment = require('moment');
 
 // Other Service requirement
 const TeacherService = require("../services/teacher-service");
@@ -15,11 +11,6 @@ const StudentService = require("../services/student-service");
 const NotificationService = require("../services/notification-service");
 
 // Constants
-
-// Error Handling
-// const ErrorCode = require('../constants/responseErrorCode');
-// const CustomError = require('../base/CustomError');
-// const ResponseObject = require('../base/ResponseObject');
 
 module.exports = {
     registerStudents,

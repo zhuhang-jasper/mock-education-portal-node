@@ -5,7 +5,6 @@ process.title = "Ufinity Education Portal RESTful Server - Zhu Hang (Jasper)";
 const app = require("express")();
 const cors = require("cors");
 const uuid = require("uuid");
-// const http = require("http");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const httpContext = require("express-http-context");
@@ -19,8 +18,6 @@ const AppLogger = require(appRoot + "/config/logger/appLogger");
 const BaseController = require("./api/base/baseController");
 const EnvUtil = require("./api/utils/envUtil");
 // const JwtUtil = require("./api/utils/jwtUtil");
-// const CustomError = require("./api/base/CustomError");
-// const ResponseErrorCode = require("./api/constants/responseErrorCode");
 
 /* For Swagger UI documentation */
 const YAML = require("yamljs");

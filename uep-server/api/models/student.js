@@ -4,7 +4,7 @@ module.exports = class Student {
 
     /**
      * Create Student object
-     * @param {string} email student's email
+     * @param {string} email student email address
      */
     constructor(email) {
         /** @private */
