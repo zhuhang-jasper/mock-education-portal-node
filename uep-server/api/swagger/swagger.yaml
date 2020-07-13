@@ -41,7 +41,7 @@ paths:
         default:
           description: Error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/generalErrorResp'
 
   /commonstudents:
     x-swagger-router-controller: teacher
@@ -65,7 +65,7 @@ paths:
         default:
           description: Error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/generalErrorResp'
 
   /suspend:
     x-swagger-router-controller: teacher
@@ -87,7 +87,7 @@ paths:
         default:
           description: Error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/generalErrorResp'
 
   /retrievefornotifications:
     x-swagger-router-controller: teacher
@@ -111,7 +111,7 @@ paths:
         default:
           description: Error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/generalErrorResp'
 
 definitions:
   # GeneralResponse:
@@ -125,19 +125,26 @@ definitions:
   #     body:
   #       type: object
 
-  ErrorResponse:
+  generalErrorResp:
     properties:
-      reqId:
-        type: string
-        maxLength: 50
-      statusCode:
-        type: string
-        maxLength: 10
-      errorCode:
-        type: string
-        maxLength: 100
+      # reqId:
+      #   type: string
+      #   maxLength: 50
+      # statusCode:
+      #   type: string
+      #   maxLength: 10
       message:
         type: string
+        description: useful short error message
+      error:
+        type: object
+        properties:
+          errorCode:
+            type: string
+            description: error code
+          errorMessage:
+            type: string
+            description: detailed error message
 
   registerPostReq:
     required:
