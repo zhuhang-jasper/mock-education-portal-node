@@ -1,5 +1,7 @@
 const moment = require("moment");
 const ObjectUtil = require("../utils/objectUtil");
+const UserStatus = require("../constants/userStatus");
+
 module.exports = class TeacherStudent {
 
     /**
@@ -13,7 +15,7 @@ module.exports = class TeacherStudent {
         /** @private */
         this._studentId = studentId;
         /** @private */
-        this._status = "ACTIVE";
+        this._status = UserStatus.ACTIVE;
     }
 
     /** @type {number} */

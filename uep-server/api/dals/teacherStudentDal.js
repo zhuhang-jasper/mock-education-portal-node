@@ -11,6 +11,9 @@ const mysql = require("../../config/db").mysql;
 // Models
 const TeacherStudent = require("../models/teacherStudent");
 
+// Constants
+const UserStatus = require("../constants/userStatus");
+
 module.exports = {
     createTeacherStudentLinks
 };
@@ -50,7 +53,7 @@ async function createTeacherStudentLinks(teacherStudentLinks = [], connection = 
         const sql = `INSERT INTO ${teacherStudentTable} ` +
         " (TeacherId, StudentId, Status, CreatedBy) " +
         " VALUES ? " +
-        ` ON DUPLICATE KEY UPDATE status='ACTIVE', updatedBy='${config.db.mysql.user}' , updatedDate=CURRENT_TIMESTAMP() `;
+        ` ON DUPLICATE KEY UPDATE status='${UserStatus.ACTIVE}', updatedBy='${config.db.mysql.user}' , updatedDate=CURRENT_TIMESTAMP() `;
 
         if (Array.isArray(teacherStudentLinks) && teacherStudentLinks.length) {
             // Prepare SQL params

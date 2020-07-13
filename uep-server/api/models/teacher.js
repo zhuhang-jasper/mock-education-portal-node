@@ -1,5 +1,7 @@
 const moment = require("moment");
 const ObjectUtil = require("../utils/objectUtil");
+const UserStatus = require("../constants/userStatus");
+
 module.exports = class Teacher {
 
     /**
@@ -10,7 +12,7 @@ module.exports = class Teacher {
         /** @private */
         this._email = email;
         /** @private */
-        this._status = "INACTIVE";
+        this._status = UserStatus.INACTIVE;
     }
 
     /** @type {number} */
