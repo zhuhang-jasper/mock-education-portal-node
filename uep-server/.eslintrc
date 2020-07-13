@@ -25,6 +25,7 @@
         }
     },
     "rules": {
+        "no-control-regex": "off",
         "no-console": "off",
         "no-var": "warn",
         "no-unused-vars": "warn",

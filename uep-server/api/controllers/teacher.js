@@ -12,6 +12,7 @@ const ParamValidator = require("../utils/validator");
 // Other Service requirement
 const TeacherService = require("../services/teacher-service");
 const StudentService = require("../services/student-service");
+const NotificationService = require("../services/notification-service");
 
 // Constants
 
@@ -21,9 +22,10 @@ const StudentService = require("../services/student-service");
 // const ResponseObject = require('../base/ResponseObject');
 
 module.exports = {
-    registerStudent,
+    registerStudents,
     getCommonStudents,
-    suspendStudent
+    suspendStudent,
+    getNotificationRecipients
 };
 
 const IDENTIFIER = "TeacherController";
@@ -31,8 +33,8 @@ function logController(str) {
     AppLogger.debug(`Calling ${IDENTIFIER}->${str}()...`);
 }
 
-async function registerStudent(req, res) {
-    logController("registerStudent");
+async function registerStudents(req, res) {
+    logController("registerStudents");
 
     try {
         // Validate Query Parameters
@@ -102,9 +104,7 @@ async function getCommonStudents(req, res) {
         }
 
         const responseObj = {
-            students: serviceResponse.body.students.map(student => {
-                return student.email;
-            })
+            students: serviceResponse.body.students
         };
 
         BaseController.respond(res, 200, responseObj);
@@ -144,6 +144,44 @@ async function suspendStudent(req, res) {
         };
 
         BaseController.respond(res, 204, responseObj);
+
+    } catch (err) {
+        BaseController.respondAndLogError(res, err);
+    }
+}
+
+async function getNotificationRecipients(req, res) {
+    logController("getNotificationRecipients");
+
+    try {
+        // Validate Query Parameters
+        const validatorResponse = ParamValidator.validateParams(
+            req.body, // GET:req.query | POST:req.body
+            {
+                teacher: { type: "string", required: true },
+                notification: { type: "string", required: false }
+            },
+            null // GET:null | POST:null
+        );
+        if (validatorResponse.errObj != null) {
+            throw validatorResponse.errObj;
+        }
+
+        // Prepare request params
+        const teacherEmail = req.body.teacher;
+        const notificationText = req.body.notification;
+
+        // Pull results from database
+        const serviceResponse = await NotificationService.retrieveRecipientsForNotification(teacherEmail, notificationText);
+        if (serviceResponse.hasError()) {
+            throw serviceResponse.customError;
+        }
+
+        const responseObj = {
+            recipients: serviceResponse.body.recipients
+        };
+
+        BaseController.respond(res, 200, responseObj);
 
     } catch (err) {
         BaseController.respondAndLogError(res, err);

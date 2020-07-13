@@ -25,8 +25,10 @@ const ResponseObject = require("../base/ResponseObject");
 module.exports = {
     createAndReturnStudent,
     getStudentByEmail,
+    getStudentsByEmails,
     retrieveStudentsCommonToTeachers,
-    suspendStudent
+    suspendStudent,
+    retrieveUnsuspendedStudentsOfTeacher
 };
 
 // Database Table Names
@@ -116,6 +118,59 @@ async function getStudentByEmail(email = null) {
 }
 
 /**
+ * Get list of students of given list of email addresses
+ * @param {string[]} studentEmails student email addresses
+ * @throws Errors
+ * @returns {Student[]} student model array or empty array
+ */
+async function getStudentsByEmails(studentEmails = []) {
+    logService("getStudentsByEmails");
+
+    // Prepare SQL statement
+    const selectors = " s.id, " +
+        " s.email, " +
+        " s.firstName, " +
+        " s.lastName, " +
+        " s.status, " +
+        " s.isSuspended, " +
+        " s.createdBy, " +
+        " s.createdDate, " +
+        " s.updatedBy, " +
+        " s.updatedDate ";
+    const sql = ` SELECT ${selectors} ` +
+        ` FROM ${studentTable} s ` +
+        " WHERE s.email IN (?) ";
+
+    // Prepare SQL params
+    const params = [studentEmails];
+
+    // prepare query params
+    /** @type {Student[]} */
+    const sqlResult = [];
+    if (Array.isArray(studentEmails) && studentEmails.length) {
+        const sqlResultTemps = await mysql.executeQuery(sql, params);
+        // console.log(sqlResultTemps);
+        if (sqlResultTemps.length) {
+            for (const raw of sqlResultTemps) {
+                const temp = new Student(raw.email);
+                temp.id = raw.id;
+                temp.firstName = raw.firstName;
+                temp.lastName = raw.lastName;
+                temp.status = raw.status;
+                temp.isSuspended = (raw.isSuspended == 1);
+                temp.createdBy = raw.createdBy;
+                temp.createdDate = raw.createdDate ? moment(raw.createdDate) : undefined;
+                temp.updatedBy = raw.updatedBy;
+                temp.updatedDate = raw.updatedDate ? moment(raw.updatedDate) : undefined;
+                sqlResult.push(temp.toJSONObject());
+            }
+        }
+    }
+    const arrayResult = sqlResult;
+    return arrayResult;
+}
+
+/**
  * Get list of students common to the given list of teacher email addresses
  * @param {string[]} teacherEmails teacher email addresses
  * @throws Errors
@@ -140,20 +195,74 @@ async function getStudentsByCommonTeacherEmails(teacherEmails = []) {
         ` FROM ${teacherTable} t ` +
         ` INNER JOIN ${teacherStudentTable} ts ON t.id = ts.teacherId ` +
         ` INNER JOIN ${studentTable} s ON s.id = ts.studentId ` +
-        " WHERE t.email IN (?) ";
-        //  +
-        // " GROUP BY s.id " +
-        // " HAVING teacherCount = ? ";
+        " WHERE t.email IN (?) " +
+        " GROUP BY s.id " +
+        " HAVING teacherCount = ? ";
 
     // Prepare SQL params
-    const params = [teacherEmails];
+    const params = [teacherEmails, teacherEmails.length];
 
     // prepare query params
     /** @type {Student[]} */
     const sqlResult = [];
     if (Array.isArray(teacherEmails) && teacherEmails.length) {
         const sqlResultTemps = await mysql.executeQuery(sql, params);
-        console.log(sqlResultTemps);
+        // console.log(sqlResultTemps);
+        if (sqlResultTemps.length) {
+            for (const raw of sqlResultTemps) {
+                const temp = new Student(raw.email);
+                temp.id = raw.id;
+                temp.firstName = raw.firstName;
+                temp.lastName = raw.lastName;
+                temp.status = raw.status;
+                temp.isSuspended = (raw.isSuspended == 1);
+                temp.createdBy = raw.createdBy;
+                temp.createdDate = raw.createdDate ? moment(raw.createdDate) : undefined;
+                temp.updatedBy = raw.updatedBy;
+                temp.updatedDate = raw.updatedDate ? moment(raw.updatedDate) : undefined;
+                sqlResult.push(temp.toJSONObject());
+            }
+        }
+    }
+    const arrayResult = sqlResult;
+    return arrayResult;
+}
+
+/**
+ * Get list of unsuspended students of a given teacher email address
+ * @param {string} teacherEmail teacher email address
+ * @throws Errors
+ * @returns {Student[]} student model array or empty array
+ */
+async function getUnsuspendedStudentsOfTeacherEmail(teacherEmail = null) {
+    logService("getUnsuspendedStudentsOfTeacherEmail");
+
+    // Prepare SQL statement
+    const selectors = " s.id, " +
+        " s.email, " +
+        " s.firstName, " +
+        " s.lastName, " +
+        " s.status, " +
+        " s.isSuspended, " +
+        " s.createdBy, " +
+        " s.createdDate, " +
+        " s.updatedBy, " +
+        " s.updatedDate ";
+    const sql = ` SELECT ${selectors} ` +
+        ` FROM ${teacherTable} t ` +
+        ` INNER JOIN ${teacherStudentTable} ts ON t.id = ts.teacherId ` +
+        ` INNER JOIN ${studentTable} s ON s.id = ts.studentId ` +
+        " WHERE t.email = ? AND s.isSuspended = 0 ";
+
+    // Prepare SQL params
+    const params = [teacherEmail];
+
+    // prepare query params
+    /** @type {Student[]} */
+    const sqlResult = [];
+    if (teacherEmail) {
+        const sqlResultTemps = await mysql.executeQuery(sql, params);
+        // console.log(sqlResultTemps);
         if (sqlResultTemps.length) {
             for (const raw of sqlResultTemps) {
                 const temp = new Student(raw.email);
@@ -302,9 +411,9 @@ async function updateStudent(student = null, connection = null) {
 /* ------ Above functions supposed to be in DAL ----- */
 
 /**
- * Register students to specified teacher
- * @param {string} teacherEmail teacher's email address
- * @param {string[]} studentEmails array of student email addresses
+ * Retrieve list of students with common teachers
+ * @param {string[]} teacherEmails array of teacher email addresses
+ * @returns student emails
  */
 async function retrieveStudentsCommonToTeachers(teacherEmails = []) {
     logService("retrieveStudentsCommonToTeachers");
@@ -317,7 +426,11 @@ async function retrieveStudentsCommonToTeachers(teacherEmails = []) {
     try {
         // Query
         const commonStudents = await getStudentsByCommonTeacherEmails(teacherEmails);
-        respBody.students = commonStudents;
+
+        // Return only email address
+        respBody.students = commonStudents.map(student => {
+            return student.email;
+        });
 
     } catch (err) {
         return new ResponseObject(err);
@@ -327,7 +440,7 @@ async function retrieveStudentsCommonToTeachers(teacherEmails = []) {
 }
 
 /**
- * Suspend one student
+ * Suspend a student
  * @param {string} studentEmail student email address
  */
 async function suspendStudent(studentEmail = []) {
@@ -352,6 +465,35 @@ async function suspendStudent(studentEmail = []) {
         } else {
             respBody.suspendedStudents = updateStudentResp.body.updatedCount;
         }
+
+    } catch (err) {
+        return new ResponseObject(err);
+    }
+
+    return new ResponseObject(respBody);
+}
+
+/**
+ * Retrieve list of unsuspended students of a given teacher
+ * @param {string} teacherEmail teacher email address
+ * @returns student emails
+ */
+async function retrieveUnsuspendedStudentsOfTeacher(teacherEmail = null) {
+    logService("retrieveUnsuspendedStudentsOfTeacher");
+
+    const respBody = {
+        teacher: teacherEmail,
+        students: []
+    };
+
+    try {
+        // Query
+        const commonStudents = await getUnsuspendedStudentsOfTeacherEmail(teacherEmail);
+
+        // Return only email address
+        respBody.students = commonStudents.map(student => {
+            return student.email;
+        });
 
     } catch (err) {
         return new ResponseObject(err);

@@ -27,19 +27,17 @@ paths:
       tags:
         - Teacher
       description: Register one or more students to a specified teacher.
-      operationId: registerStudent
+      operationId: registerStudents
       parameters:
         - name: request
           in: body
           description: request
           required: true
           schema:
-            $ref: '#/definitions/teacherRegisterStudentReq'
+            $ref: '#/definitions/registerPostReq'
       responses:
-        "200":
-          description: General
-          schema:
-            $ref: '#/definitions/GeneralResponse'
+        "204":
+          description: No Content
         default:
           description: Error
           schema:
@@ -61,9 +59,9 @@ paths:
             type: string
       responses:
         "200":
-          description: General
+          description: List of students
           schema:
-            $ref: '#/definitions/GeneralResponse'
+            $ref: '#/definitions/commonstudentsResp'
         default:
           description: Error
           schema:
@@ -74,7 +72,7 @@ paths:
     post:
       tags:
         - Teacher
-      description: Suspend a specified student
+      description: Suspend a specified student.
       operationId: suspendStudent
       parameters:
         - name: request
@@ -82,37 +80,52 @@ paths:
           description: request
           required: true
           schema:
-            $ref: '#/definitions/suspendStudentReq'
+            $ref: '#/definitions/suspendPostReq'
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /retrievefornotifications:
+    x-swagger-router-controller: teacher
+    post:
+      tags:
+        - Teacher
+      description: Retrieve a list of students who can receive a given notification.
+      operationId: getNotificationRecipients
+      parameters:
+        - name: request
+          in: body
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/retrievefornotificationsPostReq'
       responses:
         "200":
-          description: General
+          description: List of recipients
           schema:
-            $ref: '#/definitions/GeneralResponse'
+            $ref: '#/definitions/retrievefornotificationsResp'
         default:
           description: Error
           schema:
             $ref: '#/definitions/ErrorResponse'
 
 definitions:
-  GeneralResponse:
-    required:
-      - reqId
-    properties:
-      reqId:
-        type: string
-        maxLength: 50
-      statusCode:
-        type: string
-        maxLength: 10
-      body:
-        type: object
+  # GeneralResponse:
+  #   properties:
+  #     reqId:
+  #       type: string
+  #       maxLength: 50
+  #     statusCode:
+  #       type: string
+  #       maxLength: 10
+  #     body:
+  #       type: object
 
   ErrorResponse:
-    required:
-      - reqId
-      - statusCode
-      - errorCode
-      - errorMessage
     properties:
       reqId:
         type: string
@@ -123,10 +136,10 @@ definitions:
       errorCode:
         type: string
         maxLength: 100
-      errorMessage:
+      message:
         type: string
 
-  teacherRegisterStudentReq:
+  registerPostReq:
     required:
       - teacher
       - students
@@ -140,10 +153,38 @@ definitions:
         items:
           type: string
 
-  suspendStudentReq:
+  commonstudentsResp:
+    properties:
+      students:
+        type: array
+        description: student email addresses
+        items:
+          type: string
+
+  suspendPostReq:
     required:
       - student
     properties:
       student:
         type: string
         description: student email address
+
+  retrievefornotificationsPostReq:
+    required:
+      - teacher
+      - notification
+    properties:
+      teacher:
+        type: string
+        description: teacher email address
+      notification:
+        type: string
+        description: notification text
+
+  retrievefornotificationsResp:
+    properties:
+      recipients:
+        type: array
+        description: student email addresses
+        items:
+          type: string

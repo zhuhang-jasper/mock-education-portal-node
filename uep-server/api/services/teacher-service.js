@@ -234,7 +234,7 @@ async function createTeacherStudentLinks(teacherStudentLinks = [], connection = 
 
 /**
  * Register students to a specified teacher
- * @param {string} teacherEmail teacher's email address
+ * @param {string} teacherEmail teacher email address
  * @param {string[]} studentEmails array of student email addresses
  */
 async function registerStudents(teacherEmail = null, studentEmails = []) {
