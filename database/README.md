@@ -18,5 +18,5 @@
 	- Import this SQL file in MySQL Workbench.
 	- Test with: `SELECT CURRENT_TIMESTAMP() AS singaporeTime, CONVERT_TZ(CURRENT_TIMESTAMP(),'Asia/Singapore','Europe/Berlin') AS germanyTime;` you should see Singapore time is 6 hours later than Germany.
 
-5. In MySQL Workbench, open [script_database_initialise_crmcti.sql](./script_database_initialise_crmcti.sql) file.
+5. In MySQL Workbench, open [script_database_initialise.sql](./script_database_initialise_crmcti.sql) file.
 	- Run all commands in the file.
