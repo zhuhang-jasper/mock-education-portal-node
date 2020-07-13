@@ -1,5 +1,5 @@
 "use strict";
-process.title = "Ufinity Education Portal RESTful Server - Zhu Hang (Jasper)";
+process.title = "Mock Education Portal RESTful Server - Zhu Hang (Jasper)";
 
 // Import libraries
 const app = require("express")();
@@ -112,7 +112,7 @@ SwaggerExpress.create(config, async function (err, swaggerExpress) {
         // console display
         const port = envConfig.app.port;
         console.log("---------------------------------------------------");
-        console.log(" Ufinity Education Portal RESTful Server");
+        console.log(" Mock Education Portal RESTful Server");
         console.log("    NODE_ENV=" + process.env.NODE_ENV);
         console.log("    API Doc: " + envConfig.app.scheme + "://" + envConfig.app.host + envConfig.app.apiDocUrl);
         console.log("    Application started. Listening at port: " + port);

@@ -1,8 +1,8 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Ufinity Education Portal RESTful Server
-  description: To serve RESTful services for education portal
+  title: Mock Education Portal RESTful Server
+  description: To serve RESTful services for a mock education portal
   contact:
     name: Jasper Loo Zhu Hang
     email: zhuhang.jasper@gmail.com
