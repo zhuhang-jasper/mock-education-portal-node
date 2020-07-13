@@ -22,6 +22,7 @@ const errorCode = {
 
     /* CTI REQUEST ERRORS / 1ST LEVEL VALIDATION : 3XX */
     INVALID_REQUEST_PARAMETER: {
+        statusCode: 400,
         code: "300",
         message: "Input Validation Error: Invalid parameter"
     },

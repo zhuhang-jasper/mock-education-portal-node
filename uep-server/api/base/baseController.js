@@ -23,17 +23,20 @@ function getRequestId() {
 
 /* Empty Error Response Template */
 const emptyApiErrorResponse = {
-    reqId: "",
-    statusCode: StatusCode.FAILED.code,
-    errorCode: ErrorCode.UNKNOWN_EXCEPTION.code,
-    message: ErrorCode.UNKNOWN_EXCEPTION.message
+    // reqId: "",
+    // statusCode: StatusCode.FAILED.code,
+    message: "",
+    error: {
+        errorCode: ErrorCode.UNKNOWN_EXCEPTION.code,
+        errorMessage: ErrorCode.UNKNOWN_EXCEPTION.message
+    }
 };
 
 /* Empty Success Response Template */
 const emptyApiSuccessResponse = {
     // reqId: "",
     // statusCode: StatusCode.SUCCESS.code,
-    // message: "Success"
+    // message: ""
 };
 
 /**
@@ -45,10 +48,13 @@ function getErrorResponse(error = null) {
     // var httpStatus = 500;
     const customError = new CustomError(error);
     const httpStatus = customError.statusCode;
-    const resp = emptyApiErrorResponse;
-    resp.reqId = getRequestId();
-    resp.errorCode = customError.errorCode;
-    resp.message = customError.errorMessage;
+    const resp = ObjectUtil.mergeDeep({}, emptyApiErrorResponse);
+    // resp.reqId = getRequestId();
+    resp.message = customError.message;
+    resp.error = {
+        errorCode: customError.errorCode,
+        errorMessage: customError.errorMessage
+    };
     // resp.actualError = customError.actualError || undefined;
 
     return { statusCode: httpStatus, response: resp };
