@@ -1,0 +1,197 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Ufinity Education Portal RESTful Server
+  description: To serve RESTful services for education portal
+  contact:
+    name: Jasper Loo Zhu Hang
+    email: zhuhang.jasper@gmail.com
+basePath: /api
+# schemes:
+  # - https
+  # - http
+# securityDefinitions:
+  # BearerJwt:
+  #   type: apiKey
+  #   in: header
+  #   name: Authorization
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+
+  /register:
+    x-swagger-router-controller: teacher
+    post:
+      tags:
+        - Teacher
+      description: Register one or more students to a specified teacher.
+      operationId: registerStudents
+      parameters:
+        - name: request
+          in: body
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/registerPostReq'
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/generalErrorResp'
+
+  /commonstudents:
+    x-swagger-router-controller: teacher
+    get:
+      tags:
+        - Teacher
+      description: Retrieve a list of students common to a given list of teachers.
+      operationId: getCommonStudents
+      parameters:
+        - in: query
+          name: teacher
+          type: array
+          required: true
+          items:
+            type: string
+      responses:
+        "200":
+          description: List of students
+          schema:
+            $ref: '#/definitions/commonstudentsResp'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/generalErrorResp'
+
+  /suspend:
+    x-swagger-router-controller: teacher
+    post:
+      tags:
+        - Teacher
+      description: Suspend a specified student.
+      operationId: suspendStudent
+      parameters:
+        - name: request
+          in: body
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/suspendPostReq'
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/generalErrorResp'
+
+  /retrievefornotifications:
+    x-swagger-router-controller: teacher
+    post:
+      tags:
+        - Teacher
+      description: Retrieve a list of students who can receive a given notification.
+      operationId: getNotificationRecipients
+      parameters:
+        - name: request
+          in: body
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/retrievefornotificationsPostReq'
+      responses:
+        "200":
+          description: List of recipients
+          schema:
+            $ref: '#/definitions/retrievefornotificationsResp'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/generalErrorResp'
+
+definitions:
+  # GeneralResponse:
+  #   properties:
+  #     reqId:
+  #       type: string
+  #       maxLength: 50
+  #     statusCode:
+  #       type: string
+  #       maxLength: 10
+  #     body:
+  #       type: object
+
+  generalErrorResp:
+    properties:
+      # reqId:
+      #   type: string
+      #   maxLength: 50
+      # statusCode:
+      #   type: string
+      #   maxLength: 10
+      message:
+        type: string
+        description: useful short error message
+      error:
+        type: object
+        properties:
+          errorCode:
+            type: string
+            description: error code
+          errorMessage:
+            type: string
+            description: detailed error message
+
+  registerPostReq:
+    required:
+      - teacher
+      - students
+    properties:
+      teacher:
+        type: string
+        description: teacher email address
+      students:
+        type: array
+        description: student email addresses
+        items:
+          type: string
+
+  commonstudentsResp:
+    properties:
+      students:
+        type: array
+        description: student email addresses
+        items:
+          type: string
+
+  suspendPostReq:
+    required:
+      - student
+    properties:
+      student:
+        type: string
+        description: student email address
+
+  retrievefornotificationsPostReq:
+    required:
+      - teacher
+      - notification
+    properties:
+      teacher:
+        type: string
+        description: teacher email address
+      notification:
+        type: string
+        description: notification text
+
+  retrievefornotificationsResp:
+    properties:
+      recipients:
+        type: array
+        description: student email addresses
+        items:
+          type: string
