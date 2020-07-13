@@ -1,10 +1,8 @@
-# ufinity-education-portal-node
+# mock-education-portal-node
 
 ## Introduction
 
-This project is intended for Ufinity Technical Assessment (Node.js).
-
-It is a Node.js SwaggerExpress app that provides REST APIs for a mock education portal.
+This project is a Node.js SwaggerExpress app that provides REST APIs for a mock education portal.
 
 This repository consists of 1 sub-project:
 
@@ -37,7 +35,7 @@ npm i -g eslint         # for development code linting use
 * Clone this repository, navigate to the desired folder path in command prompt and enter:
 
 ```
-git clone https://github.com/zhuhang-jasper/ufinity-education-portal-node.git
+git clone https://github.com/zhuhang-jasper/mock-education-portal-node.git
 ```
 
 
