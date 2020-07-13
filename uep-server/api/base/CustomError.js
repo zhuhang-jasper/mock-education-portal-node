@@ -31,6 +31,7 @@ module.exports = class CustomError extends Error {
         // CASE 1: CustomError
         if (errObj instanceof CustomError) {
             this.statusCode = errObj.statusCode;
+            this.message = errObj.message;
             this.errorCode = errObj.errorCode;
             this.errorMessage = errObj.errorMessage;
             this.transferActualError(errObj);
@@ -60,17 +61,11 @@ module.exports = class CustomError extends Error {
                 this.errorCode = errObj.type;
                 this.errorMessage = errObj.message;
             }
-            // SUB CASE : Validator Error
-            // else if (this.isValidatorError(errObj)) {
-            //     // logger.debug("CustomError: is Validator Error");
-            //     this.statusCode = 400; //bad request
-            //     this.errorCode = ErrorCode.INVALID_REQUEST_PARAMETER.code;
-            //     this.errorMessage = errObj.message;
-            // }
             // SUB CASE : MySQL Error
             else if (this.isMySqlError(errObj)) {
                 // logger.debug("CustomError: is MySQL Error");
                 // this.errorCode = 'DB_MYSQL_' + errObj.code;
+                this.message = ErrorCode.DB_MYSQL_QUERY_EXECUTE.message;
                 this.errorCode = ErrorCode.DB_MYSQL_QUERY_EXECUTE.code;
                 this.errorMessage = errObj.errno + ": " + errObj.sqlMessage;
                 // logger.error(errObj.stack); //avoid stack trace missing
@@ -83,6 +78,7 @@ module.exports = class CustomError extends Error {
             // SUB CASE : Other Throwable Errors
             else {
                 // console.log("CustomError: is other throwable Error");
+                this.message = ErrorCode.ERR_UNCAUGHT_EXCEPTION.message;
                 this.errorCode = ErrorCode.ERR_UNCAUGHT_EXCEPTION.code;
                 this.errorMessage = this.formatErrorNameMessage(errObj.name, errObj.message);
                 // logger.error(errObj.stack); //avoid stack trace missing
@@ -107,9 +103,18 @@ module.exports = class CustomError extends Error {
             this.statusCode = errObj.statusCode || this.statusCode;
             this.errorCode = errObj.code;
             this.errorMessage = errObj.message;
+            this.message = "Custom error";
+
+            // SUB CASE : Validator Error
+            if (this.isValidatorError(errObj)) {
+                // logger.debug("CustomError: is Validator Error");
+                // this.statusCode = 400; // bad request.
+                this.message = "Validation error";
+            }
         }
         // TIMEOUT ERROR
         else if (errObj == "timeout") {
+            this.message = ErrorCode.TIME_OUT.message;
             this.errorCode = ErrorCode.TIME_OUT.code;
             this.errorMessage = ErrorCode.TIME_OUT.message;
             this.saveAsActualError(errObj);
@@ -117,6 +122,7 @@ module.exports = class CustomError extends Error {
         // DEFAULT: Unknown Exception
         else {
             // logger.debug("CustomError: is Unknown Error");
+            this.message = ErrorCode.UNKNOWN_EXCEPTION.message;
             this.errorCode = ErrorCode.UNKNOWN_EXCEPTION.code;
             this.errorMessage = ErrorCode.UNKNOWN_EXCEPTION.message;
             this.saveAsActualError(errObj);
@@ -136,16 +142,6 @@ module.exports = class CustomError extends Error {
                 this.saveAsActualError(errObj);
             }
         }
-
-        // Set OSCC Error Code
-        if (errObj.osccErrorCode) {
-            this.osccErrorCode = errObj.osccErrorCode;
-        }
-
-        // Force correct http status codes
-        // if (this.errorCode == ErrorCode.INVALID_REQUEST_PARAMETER.code) {
-        //     this.statusCode = 400; //bad request
-        // }
 
         // Change Error codes to 500xxx
         if (NumberUtil.isNumeric(this.errorCode) && String(this.errorCode).length < 6) {
@@ -218,9 +214,10 @@ module.exports = class CustomError extends Error {
         return (error.statusCode && error.errors && error.errors.length);
     }
 
-    // isValidatorError(error) {
-    //     return (error.message.indexOf(Validator.errorMessagePrefix) != -1);
-    // }
+    isValidatorError(error) {
+        return (error.code == ErrorCode.INVALID_REQUEST_PARAMETER.code);
+        // return (error.message.indexOf(Validator.errorMessagePrefix) != -1);
+    }
 
     isMySqlError(error) {
         return (error.code && error.errno && error.sqlMessage);
@@ -244,8 +241,7 @@ module.exports = class CustomError extends Error {
     toSimpleLoggableObj() {
         const resp = {
             errorCode: this.errorCode,
-            errorMessage: this.errorMessage,
-            osccErrorCode: this.osccErrorCode
+            errorMessage: this.errorMessage
         };
         return resp;
     }
@@ -254,7 +250,6 @@ module.exports = class CustomError extends Error {
         const resp = {
             errorCode: this.errorCode,
             errorMessage: this.errorMessage,
-            osccErrorCode: this.osccErrorCode,
             actualError: this.actualError
         };
 
