@@ -1,7 +1,7 @@
 {
-  "name": "ufinity-education-portal-node",
+  "name": "mock-education-portal-node",
   "version": "1.0.0",
-  "description": "ufinity technical assesment",
+  "description": "for technical assesment use",
   "main": "app.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=dev nodemon app.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zhuhang-jasper/ufinity-education-portal-node.git"
+    "url": "git+https://github.com/zhuhang-jasper/mock-education-portal-node.git"
   },
   "author": "zhuhang-jasper",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zhuhang-jasper/ufinity-education-portal-node/issues"
+    "url": "https://github.com/zhuhang-jasper/mock-education-portal-node/issues"
   },
-  "homepage": "https://github.com/zhuhang-jasper/ufinity-education-portal-node#readme",
+  "homepage": "https://github.com/zhuhang-jasper/mock-education-portal-node#readme",
   "dependencies": {
     "app-root-path": "^3.0.0",
     "body-parser": "^1.19.0",
