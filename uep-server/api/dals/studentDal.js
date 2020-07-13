@@ -16,7 +16,7 @@ module.exports = {
     getStudentByEmail,
     getStudentsByEmails,
     getStudentsByCommonTeacherEmails,
-    getUnsuspendedStudentsOfTeacherEmail,
+    getStudentsByTeacherEmail,
     createStudent,
     updateStudent
 };
@@ -106,10 +106,11 @@ async function getStudentByEmail(email = null) {
 /**
  * Get list of students of given list of email addresses
  * @param {string[]} emails student email addresses
+ * @param {boolean} isSuspended whether student is suspended (optional)
  * @throws Errors
  * @returns {Promise<Student[]>} student model array or empty array
  */
-async function getStudentsByEmails(emails = []) {
+async function getStudentsByEmails(emails = [], isSuspended = null) {
     logDal("getStudentsByEmails");
 
     // Prepare SQL statement
@@ -123,17 +124,83 @@ async function getStudentsByEmails(emails = []) {
         " s.createdDate, " +
         " s.updatedBy, " +
         " s.updatedDate ";
-    const sql = ` SELECT ${selectors} ` +
+    let sql = ` SELECT ${selectors} ` +
         ` FROM ${studentTable} s ` +
         " WHERE s.email IN (?) ";
 
     // Prepare SQL params
     const params = [emails];
 
+    if (isSuspended != null) {
+        sql += " AND s.isSuspended = ? ";
+        params.push(isSuspended == false ? 0 : 1);
+    }
+
     // prepare query params
     /** @type {Student[]} */
     const sqlResult = [];
     if (Array.isArray(emails) && emails.length) {
+        const sqlResultTemps = await mysql.executeQuery(sql, params);
+        // console.log(sqlResultTemps);
+        if (sqlResultTemps.length) {
+            for (const raw of sqlResultTemps) {
+                const temp = new Student(raw.email);
+                temp.id = raw.id;
+                temp.firstName = raw.firstName;
+                temp.lastName = raw.lastName;
+                temp.status = raw.status;
+                temp.isSuspended = (raw.isSuspended == 1);
+                temp.createdBy = raw.createdBy;
+                temp.createdDate = raw.createdDate ? moment(raw.createdDate) : undefined;
+                temp.updatedBy = raw.updatedBy;
+                temp.updatedDate = raw.updatedDate ? moment(raw.updatedDate) : undefined;
+                sqlResult.push(temp.toJSONObject());
+            }
+        }
+    }
+    const arrayResult = sqlResult;
+    return arrayResult;
+}
+
+/**
+ * Get list of unsuspended students of a given teacher email address
+ * @param {string} teacherEmail teacher email address
+ * @param {boolean} isSuspended whether student is suspended (optional)
+ * @throws Errors
+ * @returns {Promise<Student[]>} student model array or empty array
+ */
+async function getStudentsByTeacherEmail(teacherEmail = null, isSuspended = null) {
+    logDal("getStudentsByTeacherEmail");
+
+    // Prepare SQL statement
+    const selectors = " s.id, " +
+        " s.email, " +
+        " s.firstName, " +
+        " s.lastName, " +
+        " s.status, " +
+        " s.isSuspended, " +
+        " s.createdBy, " +
+        " s.createdDate, " +
+        " s.updatedBy, " +
+        " s.updatedDate ";
+    let sql = ` SELECT ${selectors} ` +
+        ` FROM ${teacherTable} t ` +
+        ` INNER JOIN ${teacherStudentTable} ts ON t.id = ts.teacherId ` +
+        ` INNER JOIN ${studentTable} s ON s.id = ts.studentId ` +
+        " WHERE t.email = ? ";
+
+    // Prepare SQL params
+    const params = [teacherEmail];
+
+    if (isSuspended != null) {
+        sql += " AND s.isSuspended = ? ";
+        params.push(isSuspended == false ? 0 : 1);
+    }
+
+    // prepare query params
+    /** @type {Student[]} */
+    const sqlResult = [];
+    if (teacherEmail) {
         const sqlResultTemps = await mysql.executeQuery(sql, params);
         // console.log(sqlResultTemps);
         if (sqlResultTemps.length) {
@@ -192,61 +259,6 @@ async function getStudentsByCommonTeacherEmails(teacherEmails = []) {
     /** @type {Student[]} */
     const sqlResult = [];
     if (Array.isArray(teacherEmails) && teacherEmails.length) {
-        const sqlResultTemps = await mysql.executeQuery(sql, params);
-        // console.log(sqlResultTemps);
-        if (sqlResultTemps.length) {
-            for (const raw of sqlResultTemps) {
-                const temp = new Student(raw.email);
-                temp.id = raw.id;
-                temp.firstName = raw.firstName;
-                temp.lastName = raw.lastName;
-                temp.status = raw.status;
-                temp.isSuspended = (raw.isSuspended == 1);
-                temp.createdBy = raw.createdBy;
-                temp.createdDate = raw.createdDate ? moment(raw.createdDate) : undefined;
-                temp.updatedBy = raw.updatedBy;
-                temp.updatedDate = raw.updatedDate ? moment(raw.updatedDate) : undefined;
-                sqlResult.push(temp.toJSONObject());
-            }
-        }
-    }
-    const arrayResult = sqlResult;
-    return arrayResult;
-}
-
-/**
- * Get list of unsuspended students of a given teacher email address
- * @param {string} teacherEmail teacher email address
- * @throws Errors
- * @returns {Promise<Student[]>} student model array or empty array
- */
-async function getUnsuspendedStudentsOfTeacherEmail(teacherEmail = null) {
-    logDal("getUnsuspendedStudentsOfTeacherEmail");
-
-    // Prepare SQL statement
-    const selectors = " s.id, " +
-        " s.email, " +
-        " s.firstName, " +
-        " s.lastName, " +
-        " s.status, " +
-        " s.isSuspended, " +
-        " s.createdBy, " +
-        " s.createdDate, " +
-        " s.updatedBy, " +
-        " s.updatedDate ";
-    const sql = ` SELECT ${selectors} ` +
-        ` FROM ${teacherTable} t ` +
-        ` INNER JOIN ${teacherStudentTable} ts ON t.id = ts.teacherId ` +
-        ` INNER JOIN ${studentTable} s ON s.id = ts.studentId ` +
-        " WHERE t.email = ? AND s.isSuspended = 0 ";
-
-    // Prepare SQL params
-    const params = [teacherEmail];
-
-    // prepare query params
-    /** @type {Student[]} */
-    const sqlResult = [];
-    if (teacherEmail) {
         const sqlResultTemps = await mysql.executeQuery(sql, params);
         // console.log(sqlResultTemps);
         if (sqlResultTemps.length) {

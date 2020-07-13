@@ -11,15 +11,15 @@ const ObjectUtil = require("../utils/objectUtil");
 // const EnvUtil = require("../utils/envUtil");
 // const moment = require("moment");
 
-const StatusCode = require("../constants/responseStatusCode");
+// const StatusCode = require("../constants/responseStatusCode");
 const ErrorCode = require("../constants/responseErrorCode");
 
 const excludeLoggingPath = [""];
 
-function getRequestId() {
-    const httpContext = require("express-http-context");
-    return httpContext.get("reqId");
-}
+// function getRequestId() {
+//     const httpContext = require("express-http-context");
+//     return httpContext.get("reqId");
+// }
 
 /* Empty Error Response Template */
 const emptyApiErrorResponse = {

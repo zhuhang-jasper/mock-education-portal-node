@@ -47,7 +47,7 @@ async function retrieveRecipientsForNotification(teacherEmail = null, notificati
         let verifiedMentionedStudentsEmails = [];
         const emailsMentioned = StringUtil.getEmailMentionsFromText(notificationText);
         if (emailsMentioned && emailsMentioned.length) {
-            const verifiedMentionedStudents = await StudentDal.getStudentsByEmails(emailsMentioned);
+            const verifiedMentionedStudents = await StudentDal.getStudentsByEmails(emailsMentioned, false);
             if (verifiedMentionedStudents.length) {
                 verifiedMentionedStudentsEmails = verifiedMentionedStudents.map(student => {
                     return student.email;
@@ -57,7 +57,7 @@ async function retrieveRecipientsForNotification(teacherEmail = null, notificati
 
         // Retrieve unsuspended students of a teacher
         let teacherUnsuspendedStudentsEmails = [];
-        const unsuspendedStudents = await StudentDal.getUnsuspendedStudentsOfTeacherEmail(teacherEmail);
+        const unsuspendedStudents = await StudentDal.getStudentsByTeacherEmail(teacherEmail, false);
         teacherUnsuspendedStudentsEmails = unsuspendedStudents.map(student => {
             return student.email;
         });

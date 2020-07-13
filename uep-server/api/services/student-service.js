@@ -102,7 +102,7 @@ async function retrieveUnsuspendedStudentsOfTeacher(teacherEmail = null) {
 
     try {
         // Query
-        const unsuspendedStudents = await StudentDal.getUnsuspendedStudentsOfTeacherEmail(teacherEmail);
+        const unsuspendedStudents = await StudentDal.getStudentsByTeacherEmail(teacherEmail, false);
 
         // Return only email address
         respBody.students = unsuspendedStudents.map(student => {
