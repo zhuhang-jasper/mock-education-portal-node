@@ -29,7 +29,7 @@
     "express-http-context": "^1.2.3",
     "helmet": "^3.23.3",
     "jsonwebtoken": "^8.5.1",
-    "lodash": ">=4.17.12",
+    "lodash": ">=4.17.21",
     "moment": "^2.27.0",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.3",
